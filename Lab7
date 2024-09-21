@@ -1,0 +1,84 @@
+#include <Arduino.h>
+
+// Se definen los leds
+#define ledv 18
+#define leda 19
+#define ledr 21
+// Se define el potenciómetro
+#define Pot 13
+// Variable para controlar el tiempo de las leds
+int tiempo_ms;
+int led;
+// Variable que define qué debe hacer el programa
+int modo = 0; // El programa inicia en el modo 0
+// Variable para leer el voltaje del potenciómetro
+float voltaje;
+
+// Prototipos de función
+void encenderLed(int led, int tiempo); // Función para encender el led indicado, el tiempo deseado
+
+void setup() {
+  // inicia la conexión serial
+  Serial.begin(115200);
+  // Configuración de pines de salida para los LEDs
+  pinMode(ledr, OUTPUT);
+  pinMode(ledv, OUTPUT);
+  pinMode(leda, OUTPUT);
+}
+
+void loop() {
+
+  switch (modo)
+  {
+  case 0: // Modo inicial, el usuario elige el modo de uso
+    // Pide al usuario que elija un modo
+    Serial.println("Seleccione una opción ingresando el número correspondiente. \n 1. Lectura ADC. \n 2. Controlar LEDs.");
+    while (Serial.available() == 0) {
+      // Espera a que el usuario haya ingresado un valor
+    }
+    // Lee el modo escogido
+    modo = Serial.parseInt(); 
+    break;
+  case 1: // Modo 1: Lee el voltaje del potenciómetro
+    voltaje = analogReadMilliVolts(Pot) / 1000.0; //Lee el voltaje del potenciómetro
+    // Muestra el voltaje en la pantalla serial
+    Serial.print("Voltaje -> ");
+    Serial.println(voltaje);
+    delay(1000);
+    // Regresa al modo 0
+    modo=0;
+    break;
+  case 2: // Modo 2: Enciende un led el tiempo indicado por el usuario
+    break;
+  default:
+    Serial.println("No ingresó una opción válida.\nInténtelo de nuevo.");
+    delay(1000);
+    modo=0; // Regresa al modo 0
+    break;
+  }
+}
+
+
+// put function definitions here:
+void encenderLed(int l, int t) {
+  switch (l)
+  {
+  case 1:
+    digitalWrite(ledv, HIGH); // Enciende el led
+    vTaskDelay(t / portTICK_PERIOD_MS); // Espera el tiempo indicado
+    digitalWrite(ledv, LOW); // Apaga el led
+    break;
+  case 2:
+    digitalWrite(leda, HIGH); // Enciende el led
+    vTaskDelay(t/ portTICK_PERIOD_MS); // Espera el tiempo indicado
+    digitalWrite(leda, LOW); // Apaga el led
+    break;
+  case 3:
+    digitalWrite(ledr, HIGH); // Enciende el led
+    vTaskDelay(t/ portTICK_PERIOD_MS); // Espera el tiempo indicado
+    digitalWrite(ledr, LOW); // Apaga el led
+    break;
+  default:
+    break;
+  }
+}
