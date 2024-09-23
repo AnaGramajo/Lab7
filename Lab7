@@ -1,3 +1,9 @@
+// Universidad del Valle
+// Digital 2
+// Ana Gramajo
+// Controla un circuito mediante comunicación serial. Realizar una lectura ADC o enciende un led seleccionado una cantidad de tiempo indicada. 
+
+// Librerías
 #include <Arduino.h>
 
 // Se definen los leds
@@ -13,6 +19,9 @@ int led;
 int modo = 0; // El programa inicia en el modo 0
 // Variable para leer el voltaje del potenciómetro
 float voltaje;
+// Variables para leer el led que se debe encender y cuánto tiempo
+String datos; // Recibe la cadena ingresada por el usuario 
+int comaPos; // Guarda la posición de la coma
 
 // Prototipos de función
 void encenderLed(int led, int tiempo); // Función para encender el led indicado, el tiempo deseado
@@ -49,6 +58,31 @@ void loop() {
     modo=0;
     break;
   case 2: // Modo 2: Enciende un led el tiempo indicado por el usuario
+    Serial.println("Ingrese el LED a encender y la duración en ms (número entero), separados por coma y sin espacios. Ejemplo: 1,50");
+    Serial.println("Ingrese: \n 1. Led verde. \n 2. Led amarillo. \n 3. Led rojo."); //Pide al usuario que seleccione el led a encender
+    while (Serial.available() == 0) {
+      // Espera a que el usuario haya ingresado un valor
+    }
+    // Lee la información ingresada por el usuario
+    datos = Serial.readStringUntil('\n');  // Lee hasta el salto de línea
+    Serial.println(datos); // Muestra lo que el usuario ingresó 
+    comaPos = datos.indexOf(','); // Busca la posicicón de la coma
+    if (comaPos != -1) { // Verifica la existencia de una coma
+      led = datos.substring(0, comaPos).toInt(); // Guarda el led seleccionado
+      tiempo_ms = datos.substring(comaPos + 1).toInt(); // Guarda el tiempo seleccionado
+      if ((led!=1 && led!=2 && led!=3) || tiempo_ms==0) { // Verifica que los datos sean válidos
+        Serial.println("No ingresó datos válidos. \nInténtelo de nuevo.");
+        delay(1000);
+        modo = 2;
+      } else {
+        encenderLed(led,tiempo_ms); // nFunción que enciende el led
+        modo = 0; // Regresa al modo 0
+      }
+    } else {
+      Serial.println("No ingresó los datos en el formato correcto. \nInténtelo de nuevo.");
+      modo = 2; // Vuelve a pedir al usuario que ingrese los datos
+      delay(1000);
+    }
     break;
   default:
     Serial.println("No ingresó una opción válida.\nInténtelo de nuevo.");
